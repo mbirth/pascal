@@ -1,0 +1,11 @@
+<HTML>
+<HEAD><TITLE>Auswertung von fiktiv.txt</TITLE>
+<BODY>
+Chatter 1: RoboCop >
+Chatter 2: Fiktiv3 >
+Chatter 3: Fiktiv4 >
+Chatter 4: Fiktiv3 >
+Chatter 5: Fiktiv4 >
+Chatter 6: RoboCop >
+</BODY>
+</HTML>

@@ -1,0 +1,31 @@
+BGI-Dateien / Fonts inline
+
+BINOBJ.EXE <treibername> <objektname[.OBJ]> <linkname>
+
+procedure <linkname>; EXTERNAL;
+{$L <objektname>}
+
+RegisterBGIDriver(treiber: pointer): integer;
+RegisterBGIFont(font: pointer): integer;
+
+ex:
+
+Var drvno, fntno: integer;
+
+procedure egavga_drv; external;
+{$L egavga.obj}
+
+procedure euro_fnt; external;
+{$L euro.obj}
+
+begin
+  drvno := RegisterBGIDriver(Addr(egavga_drv));
+  fntno := RegisterBGIFont(Addr(euro_fnt));
+
+end.
+
+:endex
+
+binobj egavga.bgi egavga.obj egavga_drv
+
+binobj euro.chr euro.obj euro_fnt

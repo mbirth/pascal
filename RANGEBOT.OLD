@@ -1,0 +1,204 @@
+{$Q-} {$R-}
+
+{
+This is the story of a nice little robot called Ranger, who has a nice
+little malfunction. The malfunction makes him moving randomly around. Because
+of his malfunction he looses parts - and he must not go on them because he
+would stumble and fall down (and die). He's allowed to make a max. of ssx
+steps right/left and ssy steps up/down. There is a force field from 1 to usex
+in x-dir and from 1 to usey in y-dir. He must not go through it (because he
+will get toasted).
+
+                                    Good luck, Ranger!
+}
+
+program Ranger; { Ranger joined the game }
+
+uses Crt,Dos; { Dos only needed for time stats }
+
+const ssx=2;                             { maximum steps in x-dir }
+      ssy=2;                             { maximum steps in y-dir }
+      inact=8;                           { color for inactive sign }
+      inacts: string = #01;              { string for inactive }
+      act=14;                            { color for active sign }
+      acts: string = #02;                { string for bot }
+      bg=0;                              { bg color }
+      del=100;                           { delay between jumps }
+      usex=80;                           { how many fields to use x }
+      usey=49;                           { how many fields to use y }
+
+var x,y: byte;                           { Target coords }
+    ox,oy: byte;                         { old Target coords }
+    sx,sy: shortint;                     { how many steps }
+    dsx,dsy: byte;                       { double sx/sy 'cause he can go left AND right }
+    GSCt: integer;                       { Counter for calls of GetStep }
+    pGSCt: integer;                      { Peak of GSCt }
+    ABORT: boolean;                      { if Ranger can't move then restart }
+    deads: integer;                      { mistakes(deads) of Ranger }
+    sh,sm,ss,shn: word;                  { Prog-Starttime }
+    th,tm,ts,thn: word;                  { Ranger-Starttime }
+    ch,cm,cs,chn: word;                  { Current time }
+    uh,um,us,uhn: shortint;              { Prog UpTime }
+    lh,lm,ls,lhn: shortint;              { (current) Ranger's UpTime }
+    ph,pm,ps: shortint;                  { Peak of lh,lm,ls }
+    a: array[0..usex, 0..usey] of boolean; { used to control whether a field has already been used }
+
+procedure Initialize;    { Ranger - get ready!! }
+begin
+  Randomize;                             { some new Random-values? }
+  TextMode(3+256);                       { well, let's switch to 80x50 }
+  TextBackground(bg);                    { choose color bg - it's nicer }
+  ClrScr;                                { Put all those shit from my screen! }
+  GetTime(sh,sm,ss,shn);                 { Program: What time is it?? - Computer: well, let me look at my clock }
+  GetTime(th,tm,ts,thn);                 { Ranger: What time is it?? - Computer: don't get on my nerves }
+  ox := usex div 2;                      { well, well, well.... }
+  oy := usey div 2;                      { .... let's start in the middle }
+  dsx := ssx*2+1;                        { how many steps? .... }
+  dsy := ssy*2+1;                        { .... hmmm.... what do you think? }
+end;
+
+procedure EndSeq; { Everything has an end! }
+begin
+  TextMode(3);                           { Back to DOS-Mode }
+  TextBackground(0);                     { this shitty black }
+  TextColor(7);                          { combinated with those stupid gray }
+  ClrScr;                                { just real fuck! }
+end;
+
+function LZ(wo: real; c: integer): String;   { Leading Zero maker }
+var st: String;
+     i: integer;
+begin
+  Str(wo:0:0,st);
+  for i:=1 to c-Length(st) do begin
+    st := '0' + st;
+  end;
+  LZ := st;
+end;
+
+procedure WriteStatus;           { Calculates and writes the Stats }
+begin
+  GotoXY(1,50);
+  GetTime(ch,cm,cs,chn);
+  uh := ch-sh;
+  um := cm-sm;
+  us := cs-ss;
+  if um<0 then begin
+    um := um+60;
+    uh := uh-1;
+  end;
+  if us<0 then begin
+    us := us+60;
+    um := um-1;
+  end;
+
+  lh := ch-th;
+  lm := cm-tm;
+  ls := cs-ts;
+  if lm<0 then begin
+    lm := lm+60;
+    lh := lh-1;
+  end;
+  if ls<0 then begin
+    ls := ls+60;
+    lm := lm-1;
+  end;
+  TextColor(8);
+  Write('R:',LZ(GSCt,3),'-P:',LZ(pGSCt,3),' - ');
+  Write('Kills:',LZ(deads,4),' - ');
+  Write('CurBot:',LZ(lh,2),':',LZ(lm,2),'.',LZ(ls,2),' - ');
+  Write('Oldest:');
+  if ph+pm+ps<>0 then Write(LZ(ph,2),':',LZ(pm,2),'.',LZ(ps,2),' - ') else Write('--:--.-- - ');
+  Write('UpTime: ',LZ(uh,2),':',LZ(um,2),'.',LZ(us,2));
+end;
+
+procedure CalcNewPos;             { Where do you want to go today? }
+begin
+  if ox+sx>usex+1-Length(acts) then x:=usex+1-Length(acts);
+  if ox+sx<1 then x:=1;
+  if ((ox+sx>0) AND (ox+sx<usex+2-Length(acts))) then x := Trunc(ox+sx);
+  if oy+sy>usey-1 then y:=usey-1;
+  if oy+sy<1 then y:=1;
+  if ((oy+sy>0) AND (oy+sy<usey)) then y := Trunc(oy+sy);
+end;
+
+procedure GetStep;                { Hmm.....how many steps should he do? }
+begin
+  sx := Random(dsx);
+  sx := sx - ssx;
+  sy := Random(dsy);
+  sy := sy - ssy;
+  Inc(GSCt);
+  WriteStatus;
+  if GSCt>199 then begin          { Well, I give you 199 tries per step }
+    ABORT := True;                { to make the Randomizer find some    }
+    GSCt := 0;                    { GOOD values to move to.             }
+    Exit;
+  end;
+  CalcNewPos;                     { Let's see where we would land... }
+  Delay(del);                     { Wait a sec....not so fast }
+  if a[x,y] then begin
+    if oy>1 then GotoXY(ox,oy-1) else GotoXY(ox,oy+1);
+    TextColor(act);
+    if oy>1 then Write('?') else Write('¨');
+    GetStep;         { Already gone there? }
+  end;
+  if oy>1 then GotoXY(ox,oy-1) else GotoXY(ox,oy+1);
+  TextColor(inact);
+  if oy>1 then begin
+    if a[ox,oy-1] then Write(inacts) else Write(' ');
+  end else begin
+    if a[ox,oy+1] then Write(inacts) else Write(' ');
+  end;
+  if GSCt>pGSCt then pGSCt:=GSCt; { a new HIGHSCORE? }
+  GSCt := 0;
+end;
+
+procedure WriteNewPos;  { Brings Ranger to the new position }
+var c: integer;
+begin
+  GotoXY(Trunc(ox),Trunc(oy));
+  TextColor(inact);
+  for c:=1 to Length(acts) div Length(inacts) do Write(inacts); { write even chars of inactive over active }
+  Write(Copy(inacts,1,Length(acts) mod Length(inacts))); { if there's something missing, write another char }
+  GotoXY(x,y);
+  a[x,y]:=true;
+  TextColor(act);
+  Write(acts);
+  ox := x;
+  oy := y;
+end;
+
+procedure ReRun;       { Died? Well, you have unlimited credits! hehe }
+begin
+  for x:=1 to usex do begin
+    for y:=1 to usey do begin
+      a[x,y]:=false;
+    end;
+  end;
+  ClrScr;
+  ox := usex div 2;
+  oy := usey div 2;
+  dsx := ssx*2+1;
+  dsy := ssy*2+1;
+  ABORT := false; { ABORT complete - we're here. that's important }
+  GetTime(th,tm,ts,thn); { Ranger: What time is it? }
+  Inc(Deads); { Uh oh.... }
+  if lh*3600+lm*60+ls>ph*3600+pm*60+ps then begin  { a new HIGHSCORE?? }
+    ph := lh;
+    pm := lm;
+    ps := ls;
+  end;
+end;
+
+begin
+  Initialize;                   { Let's go .... }
+  repeat                        { Yeah, unlimited credits... }
+    GetStep;                    { Gimme some numbers... }
+    CalcNewPos;                 { Where would we land? }
+    WriteNewPos;                { Okay, let's go there }
+    Randomize;                  { Hmm...let's get new numbers }
+    if ABORT then ReRun;        { No more space to move to? }
+  until keypressed;             { Hey, wanna quit? }
+  EndSeq;                       { Okay, let's restore the old shit }
+end.                            { Bye! }

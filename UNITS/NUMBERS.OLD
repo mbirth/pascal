@@ -1,0 +1,109 @@
+unit Numbers;
+
+interface
+  function Dec2Hex(dec: byte): string;
+  function Hex2Dec(hex: string): byte;
+  function Bin2Dec(bin: string): longint;
+  function Dec2Bin(dec: longint): string;
+
+  procedure Shorten(z,n: integer; var nz,nn,fac: integer);
+  procedure AddFrac(z1,n1,z2,n2: integer; var nz,nn: integer; sh: boolean);
+  procedure SubFrac(z1,n1,z2,n2: integer; var nz,nn: integer; sh: boolean);
+
+implementation
+
+  const HexSet:string='0123456789ABCDEF';
+
+
+  function Dec2Hex(dec: byte): string;
+  var a,b: byte;
+  begin
+    a := dec DIV 16;
+    b := dec MOD 16;
+    Dec2Hex := HexSet[a+1]+HexSet[b+1];
+  end;
+
+  function Hex2Dec(hex: string): byte;
+  var a,b: byte;
+      i: integer;
+  begin
+    for i:=1 to Length(HexSet) do begin
+      if hex[1]=HexSet[i] then a:=i-1;
+      if hex[2]=HexSet[i] then b:=i-1;
+    end;
+    Hex2Dec := a*16 + b;
+  end;
+
+  function Bin2Dec(bin: string): longint;
+  var i: integer;
+      cm: longint;
+      tmp: longint;
+  begin
+    cm := 1;
+    tmp := 0;
+    if Length(bin)>30 then begin
+      Bin2Dec := 0;
+      WriteLn('OVERFLOW! Only up to 30 bits are allowed.');
+      Exit;
+    end;
+    for i:=Length(bin) downto 1 do begin
+      if bin[i]='1' then tmp := tmp + cm;
+      cm := cm * 2;
+    end;
+    Bin2Dec := tmp;
+  end;
+
+  function Dec2Bin(dec: longint): string;
+  var i: integer;
+     cm: longint;
+     tmp: string;
+  begin
+    cm := 1;
+    tmp := '';
+    for i:=1 to 30 do cm := cm * 2;
+    while cm>=1 do begin
+      if (dec div cm=0) AND (Length(tmp)>0) then tmp:=tmp+'0';
+      if (dec div cm<>0) then tmp:=tmp+'1';
+      dec := dec mod cm;
+      cm := cm div 2;
+    end;
+    if Length(tmp)=0 then tmp:='0';
+    Dec2Bin := tmp;
+  end;
+
+  procedure Shorten(z,n: integer; var nz,nn,fac: integer);
+  var curt: integer;
+      min: integer;
+  begin
+    if z<n then min:=z else min:=n;
+    for curt:=min downto 1 do begin
+      { WriteLn('curt: ',curt,' -- z/curt: ',z/curt:0:2,'  n/curt: ',n/curt:0:2);
+      Delay(100); }
+      if ((Int(z/curt)=z/curt) AND (Int(n/curt)=n/curt)) then begin
+        nz := z div curt;
+        nn := n div curt;
+        fac := curt;
+        Exit;
+      end;
+    end;
+  end;
+
+  procedure AddFrac(z1,n1,z2,n2: integer; var nz,nn: integer; sh: boolean);
+  var fac: integer;
+  begin
+    nz := z1*n2+z2*n1;
+    nn := n1*n2;
+    if sh then Shorten(nz,nn,nz,nn,fac);
+  end;
+
+  procedure SubFrac(z1,n1,z2,n2: integer; var nz,nn: integer; sh: boolean);
+  var fac: integer;
+  begin
+    nz := z1*n2-z2*n1;
+    nn := n1*n2;
+    if sh then Shorten(nz,nn,nz,nn,fac);
+  end;
+
+begin
+  WriteLn('þ Loading Unit: Numbers - RoboCop of nOOb <Robo.Cop@gmx.net>');
+end.

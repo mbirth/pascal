@@ -1,0 +1,99 @@
+unit Coder;
+
+interface
+  const code=true;
+        decode=false;
+
+  var RSInit: integer;
+
+  procedure OrdCode(var x: string; co: boolean);
+  procedure SortCode(var x: string; co: boolean);
+
+implementation
+
+  function AddOrd(var x: char; wert: byte): char; forward;
+  function SubOrd(var x: char; wert: byte): char; forward;
+  procedure SetPos(pos: integer; x: char; var st: string); forward;
+  function Space(len: integer): string; forward;
+
+
+function AddOrd(var x: char; wert: byte): char;  { Addiert wert zu der Ordinalzahl von x }
+var y: integer;                                  { und liefert das neue Zeichen }
+begin
+  y := Ord(x);
+  y := y + wert;
+  if y>255 then y:=y-255;
+  AddOrd := Chr(y);
+end;
+
+function SubOrd(var x: char; wert: byte): char;  { Subtrahiert wert von der Ordinalzahl von x }
+var y: integer;                                  { und liefert das neue Zeichen }
+begin
+  y := Ord(x);
+  y := y - wert;
+  if y<0 then y:=y+255;
+  SubOrd := Chr(y);
+end;
+
+procedure SetPos(pos: integer; x: char; var st: string);  { Setzt Zeichen an Position pos in st auf x }
+var left,right: string;
+
+begin
+  left := Copy(st,1,pos-1);
+  right := Copy(st,pos+1,Length(st)-pos);
+  st := left+x+right;
+end;
+
+function Space(len: integer): string;   { Liefert einen String mit len Leerzeichen }
+var i: integer;
+    tmp: string;
+begin
+  tmp := '';
+  for i:=1 to len do tmp:=tmp+' ';
+  Space := tmp;
+end;
+
+procedure OrdCode(var x: string; co: boolean);    { Codiert einen Text durch Addition (co=true) oder }
+var i: integer;                                   { Subtraktion (co=false) von Zufallszahlen zu/von der }
+    fin: string;                                  { Ordinalzahl der einzelnen Zeichen }
+begin
+  RandSeed:=RSInit;
+  fin := '';
+  for i:=1 to Length(x) do begin
+    if co then fin := fin + AddOrd(x[i],Random(256)) else fin := fin + SubOrd(x[i],Random(256));
+  end;
+  x := fin;
+end;
+
+procedure SortCode(var x: string; co: boolean);   { Codiert durch Vertauschen der Reihenfolge der Buchstaben }
+var i: integer;
+    pos: integer;
+    fin: string;
+    belegt: array[1..255] of boolean;
+begin
+  for i:=1 to 255 do belegt[i]:=false;
+  RandSeed:=RSInit;
+  if co then fin := Space(Length(x)) else fin := '';
+  for i:=1 to Length(x) do begin
+    if co then begin
+      repeat
+        pos := Random(Length(x))+1;
+      until NOT belegt[pos];
+      SetPos(pos,x[i],fin);
+      belegt[pos]:=true;
+    end else begin
+      repeat
+        pos := Random(Length(x))+1;
+      until NOT belegt[pos];
+      fin := fin + x[pos];
+      belegt[pos]:=true;
+    end;
+  end;
+  x := fin;
+end;
+
+
+begin
+  RSInit := 0;
+  WriteLn('þ Loading Unit: Coder - RoboCop of nOOb <Robo.Cop@gmx.net>');
+end.

@@ -1,0 +1,1 @@
+BGIPath = 'C:\SCHULS~1\TP\BGI';

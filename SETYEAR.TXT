@@ -1,0 +1,27 @@
+SetYear
+
+
+Dieses Programm ändert das Systemjahr immer auf die Zahl, die hinter dem Dateinamen angegeben wird.
+
+z.B.:
+
+SETYEAR 2001
+
+Ändert das Systemdatum auf das Jahr 2001.
+
+
+
+Zum Ändern von Date2000 gehen Sie wie folgt vor:
+
+- Kopieren Sie SETYEAR.EXE nach C:\ (DOS: "copy A:\SETYEAR.EXE C:\"; Windows95: mit dem Explorer kopieren)
+- Finden Sie die Datei AUTOEXEC.BAT (im Verzeichnis C:\)
+- Editieren Sie sie (Unter DOS: "EDIT AUTOEXEC.BAT"; Windows95: Rechtsklick auf Datei --> Bearbeiten)
+- Finden Sie die Zeile mit "DATE2000"
+- Löschen Sie diese Zeile und schreiben Sie stattdessen "SETYEAR 2001" (Jahreszahl anpassen!)
+- Speichern Sie die Datei (DOS: Alt+D --> Speichern; Windows95: Datei --> Speichern)
+- Beenden Sie den Editor (DOS: Alt+D --> Beenden; Windows95: Datei --> Beenden)
+- Starten Sie Ihren Rechner neu
+
+
+Jetzt muß man jedes Silvester nur noch die Zahl ändern.
+

@@ -1,0 +1,31 @@
+PushPopDir - an add-on for the command line             written by Markus Birth
+-------------------------------------------------------------------------------
+(c)1998 by Markus Birth <M.Birth@ThePentagon.com>
+
+To install PPDir, just copy the executable PPDIR.EXE to a directory which is
+in your path and run it there. It will extract itself into 3 parts:
+    PUSHD.EXE
+    POPD.EXE
+and SWAPD.EXE
+
+PUSHD    is used to save the current directory into the temporary buffer. The
+         buffer-file is stored in the TEMP-directory so that it survives
+         system reboots.
+
+POPD     is used to change to the directory which is stored in the buffer. The
+         buffer will be deleted after the chdir succeeds.
+
+SWAPD    will save the current directory into the buffer and then switch to
+         the directory which was in the buffer before. If you run SWAPD again
+         you will have the same state as before the first run.
+
+
+To see what's in the buffer, just type any parameter after any command. If you
+use 'debug' as parameter (without quotation marks) you will get into the
+debug-mode which will show things happening during the performance of the
+commands.
+
+
+Now have your phun!
+-------------------------------------------------------------------------------
+Bug report to M.Birth@ThePentagon.com

@@ -1,0 +1,36 @@
+program Coder_Test;
+
+uses Crt, Coder;
+
+var org,x: string;
+
+begin
+  TextBackground(0);
+  TextColor(15);
+  ClrScr;
+  Write('Zu verschlÅsselnder Text: ');
+  ReadLn(org);
+  RSInit := Length(org)*11;
+  WriteLn('RandSeed: ',RSInit);
+  WriteLn;
+
+  x := org;
+  Write('OrdCode (co=true)  :');
+  OrdCode(x,code);
+  WriteLn(x);
+
+  x := org;
+  Write('OrdCode (co=false) :');
+  OrdCode(x,decode);
+  WriteLn(x);
+
+  x := org;
+  Write('SortCode (co=true) :');
+  SortCode(x,code);
+  WriteLn(x);
+
+  x := org;
+  Write('SortCode (co=false):');
+  SortCode(x,decode);
+  WriteLn(x);
+end.
